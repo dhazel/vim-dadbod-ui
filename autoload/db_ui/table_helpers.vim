@@ -170,14 +170,14 @@ let s:sqlserver_constraints_query = "
       \ where TABLE_NAME = '{table}'"
 
 let s:sqlserver = {
-      \ 'List': 'use {schema};\n select top 200 * from [{table}]',
+      \ 'List': 'use {schema}; select top 200 * from [{table}]',
       \ 'Columns': s:sqlserver_column_summary_query,
-      \ 'Indexes': 'use {schema};\n exec sp_helpindex ''{table}''',
+      \ 'Indexes': 'use {schema}; exec sp_helpindex ''{table}''',
       \ 'Foreign Keys': s:sqlserver_foreign_keys_query,
       \ 'References': s:sqlserver_references_query,
       \ 'Primary Keys': s:sqlserver_primary_keys,
       \ 'Constraints': s:sqlserver_constraints_query,
-      \ 'Describe': 'use {schema};\n exec sp_help ''{table}''',
+      \ 'Describe': 'use {schema}; exec sp_help ''{table}''',
 \   }
 
 let s:helpers = {
