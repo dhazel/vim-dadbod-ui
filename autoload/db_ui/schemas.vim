@@ -66,11 +66,30 @@ let s:sqlserver_foreign_keys_query = "
       \ and kcu.column_name = '{col_name}'
       \ "
 
+let s:sqlserver_schemes_tables_query = "
+      \ declare @sql nvarchar(max);
+      \ select @sql = 
+      \     (SELECT ' UNION ALL
+      \         SELECT
+      \             ' +  + quotename(name,'''') + ' as database_name,
+      \             t.name COLLATE DATABASE_DEFAULT as table_name 
+      \         FROM '+ quotename(name) + '.sys.tables t
+      \         JOIN '+ quotename(name) + '.sys.schemas s
+      \             on s.schema_id = t.schema_id'
+      \      FROM sys.databases 
+      \      WHERE state=0
+      \      ORDER BY [name] for xml path(''), type).value('.', 'nvarchar(max)'
+      \     );
+      \ SET QUOTED_IDENTIFIER on
+      \ SET @sql = stuff(@sql, 1, 12, '');
+      \ execute (@sql);
+      \ "
+
 let s:sqlserver = {
       \   'args': ['-h-1', '-W', '-s', '|', '-Q'],
       \   'foreign_key_query': trim(s:sqlserver_foreign_keys_query),
-      \   'schemes_query': 'SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA',
-      \   'schemes_tables_query': 'SELECT table_schema, table_name FROM INFORMATION_SCHEMA.TABLES',
+      \   'schemes_query': 'SELECT name FROM sys.databases',
+      \   'schemes_tables_query': trim(s:sqlserver_schemes_tables_query),
       \   'select_foreign_key_query': 'select * from %s.%s where %s = %s',
       \   'cell_line_number': 2,
       \   'cell_line_pattern': '^-\+.-\+',

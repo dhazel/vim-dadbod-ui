@@ -102,14 +102,16 @@ for [helper, query] in items(s:oracle)
 endfor
 
 let s:sqlserver_column_summary_query = "
+      \ use {schema};\n
       \ select c.column_name + ' (' + \n
       \     isnull(( select 'PK, ' from information_schema.table_constraints as k join information_schema.key_column_usage as kcu on k.constraint_name = kcu.constraint_name where constraint_type='PRIMARY KEY' and k.table_name = c.table_name and kcu.column_name = c.column_name), '') + \n
       \     isnull(( select 'FK, ' from information_schema.table_constraints as k join information_schema.key_column_usage as kcu on k.constraint_name = kcu.constraint_name where constraint_type='FOREIGN KEY' and k.table_name = c.table_name and kcu.column_name = c.column_name), '') + \n
       \     data_type + coalesce('(' + rtrim(cast(character_maximum_length as varchar)) + ')','(' + rtrim(cast(numeric_precision as varchar)) + ',' + rtrim(cast(numeric_scale as varchar)) + ')','(' + rtrim(cast(datetime_precision as varchar)) + ')','') + ', ' + \n
       \     case when is_nullable = 'YES' then 'null' else 'not null' end + ')' as Columns \n
-      \ from information_schema.columns c where c.table_name='{table}' and c.TABLE_SCHEMA = '{schema}'"
+      \ from information_schema.columns c where c.table_name='{table}'"
 
 let s:sqlserver_foreign_keys_query = "
+      \ use {schema};\n
       \ SELECT c.constraint_name  \n
       \    ,kcu.column_name as column_name  \n
       \    ,c2.table_name as foreign_table_name  \n
@@ -129,9 +131,10 @@ let s:sqlserver_foreign_keys_query = "
       \             and c2.constraint_name = kcu2.constraint_name  \n
       \             and kcu.ordinal_position = kcu2.ordinal_position  \n
       \ where  c.constraint_type = 'FOREIGN KEY'  \n
-      \ and c.TABLE_NAME = '{table}' and c.TABLE_SCHEMA = '{schema}'"
+      \ and c.TABLE_NAME = '{table}'"
 
 let s:sqlserver_references_query = "
+      \ use {schema};\n
       \ select kcu1.constraint_name as constraint_name  \n
       \     ,kcu1.table_name as foreign_table_name   \n
       \     ,kcu1.column_name as foreign_column_name  \n
@@ -146,9 +149,10 @@ let s:sqlserver_references_query = "
       \     and kcu2.constraint_schema = rc.unique_constraint_schema  \n
       \     and kcu2.constraint_name = rc.unique_constraint_name  \n
       \     and kcu2.ordinal_position = kcu1.ordinal_position  \n
-      \ where kcu2.table_name='{table}' and kcu2.table_schema = '{schema}'"
+      \ where kcu2.table_name='{table}'"
 
 let s:sqlserver_primary_keys = "
+      \ use {schema};\n
       \  select tc.constraint_name, kcu.column_name \n
       \  from \n
       \      information_schema.table_constraints AS tc \n
@@ -157,22 +161,23 @@ let s:sqlserver_primary_keys = "
       \      JOIN information_schema.constraint_column_usage AS ccu \n
       \        ON ccu.constraint_name = tc.constraint_name \n
       \ where constraint_type = 'PRIMARY KEY' \n
-      \ and tc.table_name = '{table}' and tc.table_schema = '{schema}'"
+      \ and tc.table_name = '{table}'"
 
 let s:sqlserver_constraints_query = "
+      \ use {schema};\n
       \ SELECT u.CONSTRAINT_NAME, c.CHECK_CLAUSE FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE u \n
       \     inner join INFORMATION_SCHEMA.CHECK_CONSTRAINTS c on u.CONSTRAINT_NAME = c.CONSTRAINT_NAME \n
-      \ where TABLE_NAME = '{table}' and u.TABLE_SCHEMA = '{schema}'"
+      \ where TABLE_NAME = '{table}'"
 
 let s:sqlserver = {
-      \ 'List': 'select top 200 * from {optional_schema}[{table}]',
+      \ 'List': 'use {schema}; select top 200 * from [{table}]',
       \ 'Columns': s:sqlserver_column_summary_query,
-      \ 'Indexes': 'exec sp_helpindex ''{schema}.{table}''',
+      \ 'Indexes': 'use {schema}; exec sp_helpindex ''{table}''',
       \ 'Foreign Keys': s:sqlserver_foreign_keys_query,
       \ 'References': s:sqlserver_references_query,
       \ 'Primary Keys': s:sqlserver_primary_keys,
       \ 'Constraints': s:sqlserver_constraints_query,
-      \ 'Describe': 'exec sp_help ''{schema}.{table}''',
+      \ 'Describe': 'use {schema}; exec sp_help ''{table}''',
 \   }
 
 let s:helpers = {
