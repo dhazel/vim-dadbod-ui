@@ -78,6 +78,7 @@ let s:sqlserver_schemes_tables_query = "
       \             on s.schema_id = t.schema_id'
       \      FROM sys.databases 
       \      WHERE state=0
+      \      AND HAS_DBACCESS(name) = 1
       \      ORDER BY [name] for xml path(''), type).value('.', 'nvarchar(max)'
       \     );
       \ SET QUOTED_IDENTIFIER on
