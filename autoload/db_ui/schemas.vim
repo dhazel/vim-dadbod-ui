@@ -72,7 +72,7 @@ let s:sqlserver_schemes_tables_query = "
       \     (SELECT ' UNION ALL
       \         SELECT
       \             ' +  + quotename(name,'''') + ' as database_name,
-      \             t.name COLLATE DATABASE_DEFAULT as table_name 
+      \             ''['' + s.name + ''].['' + t.name + '']''  COLLATE DATABASE_DEFAULT as table_name
       \         FROM '+ quotename(name) + '.sys.tables t
       \         JOIN '+ quotename(name) + '.sys.schemas s
       \             on s.schema_id = t.schema_id'

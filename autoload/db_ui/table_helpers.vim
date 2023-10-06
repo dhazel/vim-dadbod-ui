@@ -170,7 +170,7 @@ let s:sqlserver_constraints_query = "
       \ where TABLE_NAME = '{table}'"
 
 let s:sqlserver = {
-      \ 'List': 'use {schema}; select top 200 * from [{table}]',
+      \ 'List': "use {schema};\nselect\n  top 200\n  *\nfrom\n  {table}",
       \ 'Columns': s:sqlserver_column_summary_query,
       \ 'Indexes': 'use {schema}; exec sp_helpindex ''{table}''',
       \ 'Foreign Keys': s:sqlserver_foreign_keys_query,
